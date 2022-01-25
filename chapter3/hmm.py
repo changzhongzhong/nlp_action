@@ -64,7 +64,7 @@ class HMM:
                 # 记录每一行标记结果(隐藏状态序列)
                 char_state = []
                 for w in word_list:
-                    line_state.extend(make_label(w))
+                    char_state.extend(make_label(w))
 
                 # 确保所有字都做上标记
                 assert len(char_state) == len(char_list)
