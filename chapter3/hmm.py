@@ -57,17 +57,17 @@ class HMM:
                     continue
 
                 # 把每一个字加入到字的集合中，在计算发射概率时有用
-                word_list = [i for i in line if i != ' ']
+                char_list = [i for i in line if i != ' ']
                 # 词典中的词的列表，是待标记的观察序列
-                line_list = line.split()
+                word_list = line.split()
 
                 # 记录每一行标记结果(隐藏状态序列)
                 line_state = []
-                for w in line_list:
+                for w in word_list:
                     line_state.extend(make_label(w))
 
                 # 确保所有字都做上标记
-                assert len(line_state) == len(word_list)
+                assert len(line_state) == len(char_list)
 
                 # 更新每一行的最后一个标记，为之后的计算转移概率做准备
                 last_label = line_state[-1]
@@ -78,8 +78,8 @@ class HMM:
                     # 记录每一个隐藏状态的出现次数
                     # 由于初始化时不知道有什么词，所以发射概率矩阵并未对
                     # 每一个词所在项初始化为0，因此不能简单+=，需要手动+1
-                    self.B_dic[v][word_list[k]] =\
-                        self.B_dic[v].get(word_list[k], 0) + 1.0
+                    self.B_dic[v][char_list[k]] =\
+                        self.B_dic[v].get(char_list[k], 0) + 1.0
                     if k == 0:  # 初始状态
                         self.Pi_dic[v] += 1
                     else:
