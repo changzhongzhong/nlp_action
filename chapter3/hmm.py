@@ -62,18 +62,18 @@ class HMM:
                 word_list = line.split()
 
                 # 记录每一行标记结果(隐藏状态序列)
-                line_state = []
+                char_state = []
                 for w in word_list:
                     line_state.extend(make_label(w))
 
                 # 确保所有字都做上标记
-                assert len(line_state) == len(char_list)
+                assert len(char_state) == len(char_list)
 
                 # 更新每一行的最后一个标记，为之后的计算转移概率做准备
-                last_label = line_state[-1]
+                last_label = char_state[-1]
 
                 for k, v in enumerate(line_state):
-                    if k < (len(line_state) - 1):
+                    if k < (len(char_state) - 1):
                         count_dic[v] += 1.0
                     # 记录每一个隐藏状态的出现次数
                     # 由于初始化时不知道有什么词，所以发射概率矩阵并未对
@@ -84,7 +84,7 @@ class HMM:
                         self.Pi_dic[v] += 1
                     else:
                         # 由于初始化时有把转移概率矩阵的每一项初始化为0，所以+=
-                        self.A_dic[line_state[k-1]][v] += 1.0
+                        self.A_dic[char_state[k-1]][v] += 1.0
 
         # 根据频度计算概率
         self.Pi_dic = {k: v*1.0 / line_num for k, v in self.Pi_dic.items()}
