@@ -72,7 +72,7 @@ class HMM:
                 # 更新每一行的最后一个标记，为之后的计算转移概率做准备
                 last_label = char_state[-1]
 
-                for k, v in enumerate(line_state):
+                for k, v in enumerate(char_state):
                     if k < (len(char_state) - 1):
                         count_dic[v] += 1.0
                     # 记录每一个隐藏状态的出现次数
