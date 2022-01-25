@@ -10,9 +10,9 @@ class HMM:
         self.state_list = ['B', 'M', 'E', 'S']  # 隐藏状态列表
         self.load_para = False  # 是否需要重新加载model_file
 
-        self.A_dic = {}  # 状态转移概率(隐藏状态->隐藏状态)
-        self.B_dic = {}  # 发射概率(隐藏状态->词语/观察状态)
-        self.Pi_dic = {}  # 隐藏状态的初始概率
+        self.A_dic = {}  # 状态转移概率(隐藏状态->隐藏状态)  状态数 * 状态数
+        self.B_dic = {}  # 发射概率, 条件概率 (隐藏状态->词语/观察状态) 状态数 * 字数
+        self.Pi_dic = {}  # 隐藏状态的初始概率 状态数
 
     def try_load_model(self, trained):
         if trained:
@@ -25,7 +25,7 @@ class HMM:
 
     def train(self, path):
         # self.try_load_model(False)  # 重置概率矩阵，因为要重新训练
-        count_dic = {}  # 统计状态出现的次数，用于求P(o)
+        count_dic = {}  # 统计状态出现次数，用于求P(o)
 
         def init_parameter():
             for state in self.state_list:
