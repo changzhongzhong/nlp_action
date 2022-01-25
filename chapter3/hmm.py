@@ -1,102 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import pickle
-import jieba
 import glob
 import random
-import jieba.analyse as aly
-
-
-class IMM:
-    def __init__(self, dic_path):
-        self.dictionary = set()
-        self.maximum = 0
-
-        # 读取词典
-        with open(dic_path, 'r', encoding='utf8') as f:
-            for line in f:
-                line = line.strip()  # 去除空白行
-                if not line:
-                    continue
-                self.dictionary.add(line)
-                self.maximum = max(self.maximum, len(line))
-
-    def cut(self, text):
-        result = []  # 分词结果
-        index = len(text)  # 待分词的字符串长度
-        while index > 0:  # 循环指导整个字符串分词完毕
-            word = None
-            # 在待分词字符串中找出一个最大的长度进行尝试
-            for size in range(self.maximum, 0, -1):
-                if index - size < 0:
-                    continue
-                # 按当前字符串的最大可行长度尝试划分
-                piece = text[index-size: index]
-                # 如果划分出来的部分在词典中，那么本轮尝试结束，跳到下一轮
-                # 因为要重新根据新索引找合适的size，所以需要break这个for循环
-                if piece in self.dictionary:
-                    word = piece
-                    result.append(word)
-                    # 更新下一轮的末尾索引
-                    index -= size
-                    break
-            # 如果在该index下分词都失败，那就只能跳过这个index，往前挪一步
-            if word is None:
-                result.append(text[index])
-                index -= 1
-        # 如果index <= 0，说明只剩一个或者不剩未分词的字符串，分词结束
-        return result[::-1]  # 双冒号表示步长，负数表示反向
-
-
-class MM:
-    def __init__(self, dic_path):
-        self.dictionary = set()
-        self.maximum = 0
-        with open(dic_path, 'r', encoding='utf8') as f:
-            for line in f:
-                line = line.strip()
-                if line is None:
-                    continue
-                self.dictionary.add(line)
-                self.maximum = max(self.maximum, len(line))
-
-    def cut(self, text):
-        result = []
-        index = 0
-        length = len(text)
-
-        while index < length - 1:
-            # 每次分词前需要设置一个flag，如果本轮分词失败就跳过一个索引
-            word = None
-            for size in range(self.maximum, 0, -1):
-                if index + size > length:
-                    continue
-                piece = text[index: index+size]
-                if piece in self.dictionary:
-                    word = piece
-                    result.append(word)
-                    index += size
-                    break
-            if word is None:
-                result.append(text[index])
-                index += 1
-
-        return result
-
-
-class BiMM:
-    def __init__(self, dic_path):
-        self.mm = MM(dic_path)
-        self.imm = IMM(dic_path)
-
-    def cut(self, text):
-        mm_result = self.mm.cut(text)
-        imm_result = self.imm.cut(text)
-        if len(mm_result) < len(imm_result):
-            return mm_result
-        else:
-            return imm_result
-
 
 class HMM:
     def __init__(self):
@@ -291,49 +197,11 @@ class HMM:
         if next_pos < len(text):
             yield text[next_pos:]
 
-
-class JB:
-    def __init__(self):
-        pass
-
-    @classmethod
-    def get_content(cls, path):
-        """
-        返回路径下的内容
-        :param self:
-        :param path:
-        :return: 字符串
-        """
-        with open(path, 'r', encoding='gbk', errors='ignore') as f:
-            content = ''
-            for line in f:
-                line = line.strip()
-                content += line
-            return content
-
-    @classmethod
-    def get_TF(cls, words, topK=10):
-        tf_dic = {}
-        for w in words:
-            tf_dic[w] = tf_dic.get(w, 0) + 1
-        return sorted(tf_dic.items(), key=lambda x: x[1], reverse=True)[:topK]
-
-    @classmethod
-    def stop_words(cls, path):
-        with open(path, encoding='utf8') as f:
-            return [line.strip() for line in f]
-
-
 def main():
     dic_dir = r'D:\codes\python\learning-nlp\chapter-3\data\\'
     # text = "南京市长江大桥"
     # text = "这是一个非常棒的方案！"
     # text = "中国卫生部官员24日说，截至2005年底！"
-
-    # tokenizer = IMM(dic_path)
-    # tokenizer = MM(dic_path)
-    # tokenizer = BiMM(dic_path)
-    # tokenizer = HMM()
 
     # dic_path = dic_dir + r'trainCorpus.txt_utf8'
     # tokenizer.train(dic_path)
@@ -341,26 +209,6 @@ def main():
     # print(text)
     # print(str(list(result)))
     # print(tokenizer.cut(text))
-
-    # seg_list = jieba.cut(text)
-    # print("default: ", '/'.join(seg_list))
-    # seg_list = jieba.cut(text, cut_all=True)
-    # print("cut_all: ", '/'.join(seg_list))
-    # seg_list = jieba.cut(text, cut_all=False)
-    # print("precise: ", '/'.join(seg_list))
-    # seg_list = jieba.cut_for_search(text)
-    # print("cut for search: ", '/'.join(seg_list))
-
-    files = glob.glob(dic_dir + r'news\C000013\*.txt')
-    stop_words_path = dic_dir + r'stop_words.utf8'
-    corpus = [JB.get_content(x) for x in files]
-
-    sample_inx = random.randint(0, len(corpus))
-    split_words = [x for x in jieba.cut(corpus[sample_inx])
-                   if x not in JB.stop_words(stop_words_path)]
-    print("Sample 1: ", corpus[sample_inx])
-    print("\nAfter Cutting: ", '/'.join(split_words))
-    print("\nTopK(10) words: ", str(JB.get_TF(split_words)))
 
 
 main()
