@@ -73,15 +73,14 @@ class HMM:
                 last_label = char_state[-1]
 
                 for k, v in enumerate(char_state):
+                    # 记录每一个隐藏状态的出现次数
                     if k < (len(char_state) - 1):
                         count_dic[v] += 1.0
-                    # 记录每一个隐藏状态的出现次数
-                    # 由于初始化时不知道有什么词，所以发射概率矩阵并未对
-                    # 每一个词所在项初始化为0，因此不能简单+=，需要手动+1
-                    self.B_dic[v][char_list[k]] =\
-                        self.B_dic[v].get(char_list[k], 0) + 1.0
+                    
+                    c = char_list[k] # 字符
+                    self.B_dic[v][c] = self.B_dic[v].get(c, 0) + 1.0  # 统计个数
                     if k == 0:  # 初始状态
-                        self.Pi_dic[v] += 1
+                        self.Pi_dic[v] += 1  #统计个数
                     else:
                         # 由于初始化时有把转移概率矩阵的每一项初始化为0，所以+=
                         self.A_dic[char_state[k-1]][v] += 1.0
